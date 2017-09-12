@@ -45,23 +45,25 @@ gulp.task('css-libs', function () { // Создаем таск css-libs
         })); // Обновляем CSS на странице при изменении
 });
 
-gulp.task('png-sprite', function () {// PNG Sprites
-    var spriteData =
-        gulp.src('app/img/sprites/*.*')// путь, откуда берем картинки для спрайта
-            .pipe(spritesmith({
-                imgName: 'sprite.png',//имя генерируемой картинки
-                cssName: '_png-sprite.sass',//имя css файла, который получится на выходе
-                cssFormat: 'sass',//формат css файла
-                algorithm: 'binary-tree',//способ сортировки изображений
-                cssTemplate: 'sass.template.mustache',//функция или путь до mustache шаблона, дающие возможность настроить CSS-файл на выходе
-                cssVarMap: function (sprite) {//цикл, настраивающий названия CSS переменных
-                    sprite.name = 's-' + sprite.name
-                }
-            }));
-
-    spriteData.img.pipe(gulp.dest('img/sprites/'));// путь, куда сохраняем картинку
-    spriteData.css.pipe(gulp.dest('app/sass/libs/'));// путь, куда сохраняем стили
+// Get sprite from images
+gulp.task('sprite', (cb) => {
+    let spriteData = gulp.src(['app/img/**/*.png']).pipe(spritesmith({
+        imgName: 'sprite.png',
+        cssName: '_sprite.scss',
+        algorithm: 'top-down'
+    }));
+     spriteData.css.pipe(gulp.dest('app/sass/sprite'));
+     spriteData.img.pipe(gulp.dest('img/'));
 });
+// Compress sprite image
+gulp.task('compress', ['sprite'], () => {
+    gulp.src('img/*')
+        .pipe(imagemin())
+        .pipe(gulp.dest('img/'))
+});
+// Create sprite and compress
+gulp.task('img', ['sprite', 'compress']);
+
 
 // SVG Sprites
 /*gulp.task('svg-sprite', function () {
@@ -183,7 +185,7 @@ gulp.task('extend-blocks', function () {
         .pipe(gulp.dest('./'))
 });
 
-gulp.task('watch', ['browser-sync','compress', 'extend-pages', 'css-libs', 'img', 'sass'], function () {
+gulp.task('watch', ['browser-sync','compress', 'extend-pages', 'css-libs', 'img', 'sass', 'sprite'], function () {
     gulp.watch('app/libs/**/*', ['css-libs']); // Наблюдение за папкой libs
     gulp.watch('app/img/**/*', ['img']);// Наблюдение за папкой img
     gulp.watch('app/sass/**/*.scss', ['sass']); // Наблюдение за sass файлами в папке sass
@@ -192,21 +194,21 @@ gulp.task('watch', ['browser-sync','compress', 'extend-pages', 'css-libs', 'img'
 });
 
 
-gulp.task('img', function () {
-    return gulp.src('app/img/**/*')
-        .pipe(cache(imagemin({
-            interlaced: true,
-            progressive: true,
-            svgoPlugins: [{
-                removeViewBox: false
-            }],
-            use: [pngquant()]
-        })))
-        .pipe(gulp.dest('img'))
-        .pipe(browserSync.reload({
-            stream: true
-        }));
-});
+// gulp.task('img', function () {
+//     return gulp.src('app/img/**/*')
+//         .pipe(cache(imagemin({
+//             interlaced: true,
+//             progressive: true,
+//             svgoPlugins: [{
+//                 removeViewBox: false
+//             }],
+//             use: [pngquant()]
+//         })))
+//         .pipe(gulp.dest('img'))
+//         .pipe(browserSync.reload({
+//             stream: true
+//         }));
+// });
 
 gulp.task('clear', function (callback) {
     return cache.clearAll();
