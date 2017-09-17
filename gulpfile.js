@@ -47,23 +47,13 @@ gulp.task('css-libs', function () { // Создаем таск css-libs
 
 // Get sprite from images
 gulp.task('sprite', (cb) => {
-    let spriteData = gulp.src(['app/img/**/*.png']).pipe(spritesmith({
-        imgName: 'sprite.png',
+    let spriteData = gulp.src(['app/img//**/*.png']).pipe(spritesmith({
+        imgName: '../../../img/sprite.png',
         cssName: '_sprite.scss',
         algorithm: 'top-down'
     }));
-     spriteData.css.pipe(gulp.dest('app/sass/sprite'));
-     spriteData.img.pipe(gulp.dest('img/'));
+    return spriteData.pipe(gulp.dest('app/sass/sprite'));
 });
-// Compress sprite image
-gulp.task('compress', ['sprite'], () => {
-    gulp.src('img/*')
-        .pipe(imagemin())
-        .pipe(gulp.dest('img/'))
-});
-// Create sprite and compress
-gulp.task('img', ['sprite', 'compress']);
-
 
 // SVG Sprites
 /*gulp.task('svg-sprite', function () {
@@ -194,21 +184,21 @@ gulp.task('watch', ['browser-sync','compress', 'extend-pages', 'css-libs', 'img'
 });
 
 
-// gulp.task('img', function () {
-//     return gulp.src('app/img/**/*')
-//         .pipe(cache(imagemin({
-//             interlaced: true,
-//             progressive: true,
-//             svgoPlugins: [{
-//                 removeViewBox: false
-//             }],
-//             use: [pngquant()]
-//         })))
-//         .pipe(gulp.dest('img'))
-//         .pipe(browserSync.reload({
-//             stream: true
-//         }));
-// });
+gulp.task('img', function () {
+    return gulp.src('app/img/**/*')
+        .pipe(cache(imagemin({
+            interlaced: true,
+            progressive: true,
+            svgoPlugins: [{
+                removeViewBox: false
+            }],
+            use: [pngquant()]
+        })))
+        .pipe(gulp.dest('img'))
+        .pipe(browserSync.reload({
+            stream: true
+        }));
+});
 
 gulp.task('clear', function (callback) {
     return cache.clearAll();
