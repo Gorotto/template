@@ -1,6 +1,8 @@
 var gulp = require('gulp'), // Подключаем Gulp
     sass = require('gulp-sass'), //Подключаем Sass пакет,
-    browserSync = require('browser-sync'), // Подключаем Browser Sync
+    pug = require('gulp-pug'),
+    notify = require('gulp-notify'),
+    browserSync = require('browser-sync').create(), // Подключаем Browser Sync
     concat = require('gulp-concat'), // Подключаем gulp-concat (для конкатенации файлов)
     uglify = require('gulp-uglifyjs'), // Подключаем gulp-uglifyjs (для сжатия JS)
     rename = require('gulp-rename'), // Подключаем библиотеку для переименования файлов
@@ -16,6 +18,7 @@ var gulp = require('gulp'), // Подключаем Gulp
     rimraf = require('rimraf'),//Очищает указанные исходники
     plumber = require('gulp-plumber');//Подключаем плагин, который не останавливает задачи от остановки во время их выполнения при возникновении ошибки
 
+
 var postcss = require('gulp-postcss'),//Блиотека-парсер стилей для работы с postcss-плагинами
     autoprefixer = require('autoprefixer'),// Подключаем библиотеку для автоматического добавления префиксов
     cssnano = require('cssnano'),//postcss-плагин, для минификации CSS кода, идущего на продакшен.
@@ -30,6 +33,9 @@ var postcss = require('gulp-postcss'),//Блиотека-парсер стиле
     fontmagic = require('postcss-font-magician'),
     fixes = require('postcss-fixes');
 
+let pages = [
+  'app/pug/pages/search-result/search-result.pug'
+];
 gulp.task('css-libs', function () { // Создаем таск css-libs
     var processors = [
         cssnano
@@ -131,17 +137,11 @@ gulp.task('sass', function () { // Создаем таск Sass
         }));
 });
 
-gulp.task('browser-sync', function () { // Создаем таск browser-sync
-    browserSync({ // Выполняем browserSync
-        proxy: {
-            target: 'template' // Директория для сервера - app
-        },
-        ghostMode: {
-            clicks: true,
-            forms: true,
-            scroll: true
-        },
-        notify: false // Отключаем уведомления
+gulp.task('browser-sync', () => {
+    browserSync.init({
+        server: {
+            baseDir: "./"
+        }
     });
 });
 
@@ -157,6 +157,16 @@ gulp.task('compress', ['clean'], function () {// Создаем таск compres
         .pipe(plumber.stop())
         .pipe(gulp.dest('js'));// Выгружаем в папку js
 
+});
+
+gulp.task('pug', () => {
+  return gulp.src(pages)
+      .pipe(pug())
+      .on('error', notify.onError(function(error) {
+        return `An error occurred while compiling pug.\nLook in the console for details.\n ${error}`;
+      }))
+      .pipe(gulp.dest('./'))
+      .pipe(browserSync.stream());
 });
 
 gulp.task("clean", function (cb) {
@@ -175,7 +185,8 @@ gulp.task('extend-blocks', function () {
         .pipe(gulp.dest('./'))
 });
 
-gulp.task('watch', ['browser-sync','compress', 'extend-pages', 'css-libs', 'img', 'sass', 'sprite'], function () {
+gulp.task('watch', ['browser-sync', 'pug', 'compress',/* 'extend-pages',*/ 'css-libs', 'img', 'sass', 'sprite'], function () {
+    gulp.watch(['./app/pug/pages/*.pug', './app/pug/pages/**/*.pug'], ['pug']);
     gulp.watch('app/libs/**/*', ['css-libs']); // Наблюдение за папкой libs
     gulp.watch('app/img/**/*', ['img']);// Наблюдение за папкой img
     gulp.watch('app/sass/**/*.scss', ['sass']); // Наблюдение за sass файлами в папке sass
@@ -207,4 +218,4 @@ gulp.task('clear', function (callback) {
 gulp.task('default', ['watch']);
 
 /*
- npm i gulp gulp-sass browser-sync gulp-concat gulp-uglifyjs gulp-rename del gulp-imagemin imagemin-pngquant gulp.spritesmith gulp-svgstore gulp-svgmin gulp-cache gulp-html-extend gulp-sourcemaps rimraf gulp-plumber gulp-postcss autoprefixer cssnano postcss-pxtorem postcss-px-to-em postcss-short stylefmt postcss-assets postcss-short-spacing postcss-focus postcss-sorting postcss-font-magician postcss-fixes stylelint-config-standard --save-dev*/
+ npm i gulp gulp-sass gulp-pug browser-sync gulp-concat gulp-uglifyjs gulp-rename del gulp-imagemin imagemin-pngquant gulp.spritesmith gulp-svgstore gulp-svgmin gulp-cache gulp-html-extend gulp-sourcemaps rimraf gulp-plumber gulp-postcss autoprefixer cssnano postcss-pxtorem postcss-px-to-em postcss-short stylefmt postcss-assets postcss-short-spacing postcss-focus postcss-sorting postcss-font-magician postcss-fixes stylelint-config-standard --save-dev*/
