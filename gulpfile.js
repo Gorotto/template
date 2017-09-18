@@ -53,8 +53,8 @@ gulp.task('css-libs', function () { // Создаем таск css-libs
 
 // Get sprite from images
 gulp.task('sprite', (cb) => {
-    let spriteData = gulp.src(['app/img//**/*.png']).pipe(spritesmith({
-        imgName: '../../../img/sprite.png',
+    let spriteData = gulp.src(['app/img/**/*.png']).pipe(spritesmith({
+        imgName: '../img/sprite.png',
         cssName: '_sprite.scss',
         algorithm: 'top-down'
     }));
@@ -218,4 +218,4 @@ gulp.task('clear', function (callback) {
 gulp.task('default', ['watch']);
 
 /*
- npm i gulp gulp-sass gulp-pug browser-sync gulp-concat gulp-uglifyjs gulp-rename del gulp-imagemin imagemin-pngquant gulp.spritesmith gulp-svgstore gulp-svgmin gulp-cache gulp-html-extend gulp-sourcemaps rimraf gulp-plumber gulp-postcss autoprefixer cssnano postcss-pxtorem postcss-px-to-em postcss-short stylefmt postcss-assets postcss-short-spacing postcss-focus postcss-sorting postcss-font-magician postcss-fixes stylelint-config-standard --save-dev*/
+ npm i gulp gulp-notify gulp-sass gulp-pug browser-sync gulp-concat gulp-uglifyjs gulp-rename del gulp-imagemin imagemin-pngquant gulp.spritesmith gulp-svgstore gulp-svgmin gulp-cache gulp-html-extend gulp-sourcemaps rimraf gulp-plumber gulp-postcss autoprefixer cssnano postcss-pxtorem postcss-px-to-em postcss-short stylefmt postcss-assets postcss-short-spacing postcss-focus postcss-sorting postcss-font-magician postcss-fixes stylelint-config-standard --save-dev*/
